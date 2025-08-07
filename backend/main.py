@@ -25,7 +25,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 origins = [
-    "https://visionary-empanada-0ba1aa.netlify.app/",
+    "https://visionary-empanada-0ba1aa.netlify.app",
 ]
 
 app.add_middleware(
