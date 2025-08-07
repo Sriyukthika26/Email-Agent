@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Edit, Check, Send, RefreshCw } from 'lucide-reac
 
 // --- API Client ---
 // This now points to the live Python backend
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://email-agent-backend-4oxl.onrender.com';
 
 const api = {
   generateEmail: async (leadId, userId) => {
