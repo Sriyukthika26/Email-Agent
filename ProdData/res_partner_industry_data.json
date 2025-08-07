@@ -1,0 +1,303 @@
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "result": {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Agriculture"
+        },
+        "full_name": {
+          "en_US": "A - AGRICULTURE, FORESTRY AND FISHING"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 2,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Mining"
+        },
+        "full_name": {
+          "en_US": "B - MINING AND QUARRYING"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 3,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Manufacturing"
+        },
+        "full_name": {
+          "en_US": "C - MANUFACTURING"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 4,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Energy supply"
+        },
+        "full_name": {
+          "en_US": "D - ELECTRICITY, GAS, STEAM AND AIR CONDITIONING SUPPLY"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 5,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Water supply"
+        },
+        "full_name": {
+          "en_US": "E - WATER SUPPLY; SEWERAGE, WASTE MANAGEMENT AND REMEDIATION ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 6,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Construction"
+        },
+        "full_name": {
+          "en_US": "F - CONSTRUCTION"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 7,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Wholesale/Retail"
+        },
+        "full_name": {
+          "en_US": "G - WHOLESALE AND RETAIL TRADE; REPAIR OF MOTOR VEHICLES AND MOTORCYCLES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 8,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Transportation/Logistics"
+        },
+        "full_name": {
+          "en_US": "H - TRANSPORTATION AND STORAGE"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 9,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Food/Hospitality"
+        },
+        "full_name": {
+          "en_US": "I - ACCOMMODATION AND FOOD SERVICE ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 10,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "IT/Communication"
+        },
+        "full_name": {
+          "en_US": "J - INFORMATION AND COMMUNICATION"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 11,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Finance/Insurance"
+        },
+        "full_name": {
+          "en_US": "K - FINANCIAL AND INSURANCE ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 12,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Real Estate"
+        },
+        "full_name": {
+          "en_US": "L - REAL ESTATE ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 13,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Scientific"
+        },
+        "full_name": {
+          "en_US": "M - PROFESSIONAL, SCIENTIFIC AND TECHNICAL ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 14,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Administrative/Utilities"
+        },
+        "full_name": {
+          "en_US": "N - ADMINISTRATIVE AND SUPPORT SERVICE ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 15,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Public Administration"
+        },
+        "full_name": {
+          "en_US": "O - PUBLIC ADMINISTRATION AND DEFENCE; COMPULSORY SOCIAL SECURITY"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 16,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Education"
+        },
+        "full_name": {
+          "en_US": "P - EDUCATION"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 17,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Health/Social"
+        },
+        "full_name": {
+          "en_US": "Q - HUMAN HEALTH AND SOCIAL WORK ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 18,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Entertainment"
+        },
+        "full_name": {
+          "en_US": "R - ARTS, ENTERTAINMENT AND RECREATION"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 19,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Other Services"
+        },
+        "full_name": {
+          "en_US": "S - OTHER SERVICE ACTIVITIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 20,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Households"
+        },
+        "full_name": {
+          "en_US": "T - ACTIVITIES OF HOUSEHOLDS AS EMPLOYERS; UNDIFFERENTIATED GOODS- AND SERVICES-PRODUCING ACTIVITIES OF HOUSEHOLDS FOR OWN USE"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      },
+      {
+        "id": 21,
+        "create_uid": 1,
+        "write_uid": 1,
+        "name": {
+          "en_US": "Extraterritorial"
+        },
+        "full_name": {
+          "en_US": "U - ACTIVITIES OF EXTRATERRITORIAL ORGANISATIONS AND BODIES"
+        },
+        "active": true,
+        "create_date": "2025-03-31 05:08:48",
+        "write_date": "2025-03-31 05:08:48"
+      }
+    ]
+  }
+}
