@@ -24,10 +24,13 @@ app = FastAPI(
     description="API for orchestrating email generation with a full human-in-the-loop workflow.",
     lifespan=lifespan,
 )
+origins = [
+    "https://visionary-empanada-0ba1aa.netlify.app/",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
