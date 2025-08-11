@@ -25,7 +25,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 origins = [
-    "https://visionary-empanada-0ba1aa.netlify.app",
+    "https://visionary-empanada-0ba1aa.netlify.app"
 ]
 
 app.add_middleware(
@@ -45,6 +45,7 @@ async def start_generation(request: GenerationRequest):
     inputs = {
         "lead_id": request.leadId,
         "user_id": request.userId,
+        "user_instructions": request.user_instructions,
         "email_history": [],
     }
     
