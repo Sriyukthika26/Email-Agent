@@ -3,16 +3,18 @@ import { ArrowLeft, ArrowRight, Edit, Check, Send, RefreshCw } from 'lucide-reac
 
 // --- API Client ---
 // This now points to the live Python backend
-const API_BASE_URL = 'https://email-agent-backend-4oxl.onrender.com';
+// const API_BASE_URL = 'https://email-agent-backend-4oxl.onrender.com';
+
+const API_BASE_URL = 'http://localhost:8000';
 
 const api = {
-  generateEmail: async (leadId, userId) => {
-    const response = await fetch(`${API_BASE_URL}/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ leadId, userId }),
+    generateEmail: async (leadId, userId, userInstructions) => {
+        const response = await fetch(`${API_BASE_URL}/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ leadId, userId, user_instructions: userInstructions }),  
     });
 
     if (!response.ok) {
@@ -53,6 +55,19 @@ const InputField = ({ id, label, value, onChange }) => (
     </div>
 );
 
+const TextareaField = ({ id, label, value, onChange, placeholder }) => (
+    <div>
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <textarea
+            id={id}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            rows="3"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow"
+        />
+    </div>
+);
 const IconButton = ({ onClick, children, disabled = false, className = '' }) => (
     <button
         onClick={onClick}
@@ -88,6 +103,7 @@ const DataCard = ({ title, data }) => (
 export default function App() {
     const [leadId, setLeadId] = useState('2094');
     const [userId, setUserId] = useState('53');
+    const [userInstructions, setUserInstructions] = useState(''); 
     const [retrievedData, setRetrievedData] = useState(null);
     const [emailHistory, setEmailHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -121,7 +137,7 @@ export default function App() {
         setCurrentThreadId(null);
 
         try {
-            const result = await api.generateEmail(leadId, userId);
+            const result = await api.generateEmail(leadId, userId, userInstructions);
             
             setRetrievedData(result.retrievedData);
             setCurrentThreadId(result.thread_id);
@@ -134,7 +150,7 @@ export default function App() {
         } finally {
             setIsLoading(false);
         }
-    }, [leadId, userId]);
+    }, [leadId, userId, userInstructions]);
 
     const handleRegenerateWithFeedback = async () => {
         if (!currentThreadId || !feedback) return;
@@ -205,6 +221,13 @@ export default function App() {
                         <div className="space-y-4">
                             <InputField id="leadId" label="Lead ID" value={leadId} onChange={(e) => setLeadId(e.target.value)} />
                             <InputField id="userId" label="User ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
+                            <TextareaField 
+                                id="userInstructions"
+                                label="Optional Instructions / Tone"
+                                value={userInstructions}
+                                onChange={(e) => setUserInstructions(e.target.value)}
+                                placeholder="e.g., 'Be very formal and direct.' or 'Mention that we are offering a 10% discount this month.'"
+                            />
                             <PrimaryButton onClick={handleGenerate} disabled={isLoading} isLoading={isLoading && !currentEmail}>
                                 Generate Email
                             </PrimaryButton>
