@@ -8,6 +8,7 @@ class GenerationRequest(BaseModel):
     """Request model for starting a new email generation flow."""
     leadId: str
     userId: str
+    user_instructions: str | None = None
 
 class UpdateRequest(BaseModel):
     """Request model for updating a flow with feedback or approval."""
@@ -26,6 +27,7 @@ class AgentState(TypedDict):
     """Represents the state of our email generation agent."""
     lead_id: str
     user_id: str
+    user_instructions: str | None
     db_data: dict
     email_history: List[EmailDraft]
     feedback: str | None
