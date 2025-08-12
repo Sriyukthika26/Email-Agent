@@ -31,5 +31,5 @@ class AgentState(TypedDict):
     db_data: dict
     email_history: List[EmailDraft]
     feedback: str | None
-    human_decision: Literal["regenerate", "approve", ""]
+    human_decision: Literal["regenerate", "approve"]| None
     error_message: str | None
