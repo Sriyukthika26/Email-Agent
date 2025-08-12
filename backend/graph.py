@@ -5,14 +5,13 @@ from typing import Literal
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, END, START
 
 # Import from our other modules
 from datamodels import AgentState, EmailDraft
 from config import CRM_API_KEY, CRM_API_URL, LLM_MODEL
 from prompt import EMAIL_GENERATION_PROMPT
-
+from datafetch import datafetch
 # --- Graph Nodes (The "workers" of our agent) ---
 
 def fetch_database_info(state: AgentState) -> AgentState:
@@ -32,13 +31,8 @@ def fetch_database_info(state: AgentState) -> AgentState:
         # 1. Fetch User to get company_id
         print(f"Fetching res_users for id: {user_id}")
         user_query = f"SELECT * FROM res_users WHERE id = {user_id};"
-        print(f"Executing query: {user_query}")
-        user_payload = {"query": user_query}
-        user_response = requests.post(CRM_API_URL, headers=headers, data=json.dumps(user_payload))
-        
-        user_data = user_response.json()
+        user_records = datafetch(user_query)
 
-        user_records = user_data["result"]["data"]
         if not user_records:
             return {**state, "error_message": f"No user found for user_id: {user_id}"}
         
@@ -62,11 +56,8 @@ def fetch_database_info(state: AgentState) -> AgentState:
                 street_number, street_number2
             FROM res_partner WHERE id = {partner_id};
         """
-        partner_payload = {"query": partner_query}
-        partner_response = requests.post(CRM_API_URL, headers=headers, data=json.dumps(partner_payload))
-        partner_response.raise_for_status()
-        partner_json = partner_response.json()
-        partner_records = partner_json.get("result", {}).get("data", [])
+        partner_records = datafetch(partner_query)
+
         if not partner_records:
             return {**state, "error_message": f"No partner contact found for partner_id: {partner_id}"}
         db_data["res_partner"] = partner_records[0]
@@ -74,10 +65,8 @@ def fetch_database_info(state: AgentState) -> AgentState:
         # 3. Fetch Organization
         print(f"Fetching organization_organization for company_id: {company_id}")
         org_query = f"SELECT * FROM organization_organization WHERE company_id = {company_id};"
-        org_payload = {"query": org_query}
-        org_response = requests.post(CRM_API_URL, headers=headers, data=json.dumps(org_payload))
-        org_json = org_response.json()
-        org_records = org_json.get("result", {}).get("data", [])
+        org_records = datafetch(org_query)
+
         if not org_records:
             return {**state,"error_message": f"No organization found for company_id: {company_id}"}
         db_data["organization"] = org_records[0]
@@ -85,11 +74,8 @@ def fetch_database_info(state: AgentState) -> AgentState:
         # 4. Fetch Lead to get stage_id
         print(f"Fetching crm_lead for id: {lead_id}")
         lead_query = f"SELECT * FROM crm_lead WHERE id = {lead_id};"
-        lead_payload = {"query": lead_query}
-        lead_response = requests.post(CRM_API_URL, headers=headers, data=json.dumps(lead_payload))
-        lead_response.raise_for_status()
-        lead_json = lead_response.json()
-        lead_records = lead_json.get("result", {}).get("data", [])
+        lead_records = datafetch(lead_query)
+
         if not lead_records:
             return {**state,"error_message": f"No lead found for lead_id: {lead_id}"}
         db_data["crm_lead"] = lead_records[0]
@@ -99,11 +85,8 @@ def fetch_database_info(state: AgentState) -> AgentState:
         if stage_id:
             print(f"Fetching crm_stage for id: {stage_id}")
             stage_query = f"SELECT * FROM crm_stage WHERE id = {stage_id};"
-            stage_payload = {"query": stage_query}
-            stage_response = requests.post(CRM_API_URL, headers=headers, data=json.dumps(stage_payload))
-            stage_response.raise_for_status()
-            stage_json = stage_response.json()
-            stage_records = stage_json.get("result", {}).get("data", [])
+            stage_records = datafetch(stage_query)
+
             if stage_records:
                 db_data["crm_stage"] = stage_records[0]
             else:
@@ -127,42 +110,31 @@ def fetch_database_info(state: AgentState) -> AgentState:
     
 
 def generate_email_draft(state: AgentState) -> AgentState:
-    """
-    Generates a personalized email draft based on CRM data and any user feedback.
-    """
-    print("--- GENERATING EMAIL DRAFT ---")
-
-    # 1. Unpack the required data from the current state
-    db_data = state.get("db_data")
-    user_instructions = state.get("user_instructions", "No specific instructions provided.")
+    """Generates a personalized email draft based on CRM data and any user feedback."""
+    print("--- (RUNNING) GENERATING EMAIL DRAFT ---")
+    db_data = state["db_data"]
     feedback = state.get("feedback")
     email_history = state.get("email_history", [])
+    user_instructions = state.get("user_instructions", "No specific instructions provided.")
 
-    # 2. Construct the feedback section for the prompt
     feedback_section = ""
     if feedback and email_history:
         previous_draft = email_history[-1]
         feedback_section = f"""
         **IMPORTANT HUMAN FEEDBACK ON THE PREVIOUS DRAFT:**
-        A human reviewed the last draft you generated and provided this feedback. 
-        You MUST apply these changes to generate a new, improved version.
-
+        A human reviewed the last draft and provided this feedback. You MUST apply these changes.
         PREVIOUS DRAFT:
         ---
         Subject: {previous_draft.subject}
         Body: {previous_draft.body}
         ---
-
         REQUIRED CHANGES: "{feedback}"
         """
-
-    # 3. Set up the LangChain components
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0.5)
     structured_llm = llm.with_structured_output(EmailDraft)
     prompt = ChatPromptTemplate.from_template(EMAIL_GENERATION_PROMPT)
     generation_chain = prompt | structured_llm
-
-    # 4. Invoke the generation chain with all the necessary data
+    
     email_draft = generation_chain.invoke({
         "lead_data": json.dumps(db_data.get("crm_lead")),
         "partner_data": json.dumps(db_data.get("res_partner")),
@@ -174,53 +146,60 @@ def generate_email_draft(state: AgentState) -> AgentState:
         "feedback_section": feedback_section,
     })
     
-    # 5. Update the state for the next step in the graph
     new_history = email_history + [email_draft]
-    return {
-        **state,
-        "email_history": new_history,
-        "feedback": None,  # Clear feedback after it has been used
-        "human_decision": "",  # Clear the human decision
-    }
-def route_human_choice(state: AgentState) -> Literal["generate_email", "end_process"]:
-    """Node to decide the next step based on human input."""
-    print(f"--- ROUTING HUMAN DECISION: {state.get('human_decision')} ---")
-    if state.get("human_decision") == "regenerate":
-        return "generate_email"
-    else: # approve
-        return "end_process"
+    return {"email_history": new_history, "feedback": None, "human_decision": None}
+
 
 def save_approved_email(state: AgentState):
-    """node for saving the approved email."""
-    print("--- SAVING APPROVED EMAIL ---")
+    """A placeholder node for saving the approved email."""
+    print("--- (RUNNING) SAVING APPROVED EMAIL ---")
     approved_email = state.get("email_history", [])[-1]
-    print(f"Subject: {approved_email.subject}")
-    print(f"Body: {approved_email.body}")
-    # TODO: save this is in database
-    print("--- PROCESS COMPLETE ---")
+    print(f"Final Approved Email Subject: {approved_email.subject}")
+    # In a real application, you would save this to a database.
     return {}
 
+# --- Master Router ---
+
+def route_action(state: AgentState) -> Literal["fetch_data", "generate_email", "end_process"]:
+    """The main router. It decides the next action based on the human's decision or the state."""
+    print("--- (ROUTING) DECIDING NEXT ACTION ---")
+    
+    if state.get("human_decision") == "regenerate":
+        print("--- Decision: Regenerate. Routing to generate_email. ---")
+        return "generate_email"
+    
+    if state.get("human_decision") == "approve":
+        print("--- Decision: Approve. Routing to end_process. ---")
+        return "end_process"
+    
+    # If no decision, it's the first run. Check if data exists.
+    if state.get("db_data"):
+         print("--- Data found. Routing to generate_email. ---")
+         return "generate_email"
+    else:
+        print("--- No data found. Routing to fetch_data. ---")
+        return "fetch_data"
 
 # --- Graph Definition ---
 
-checkpointer = MemorySaver()
 workflow = StateGraph(AgentState)
 
+# Add all the worker nodes to the graph
 workflow.add_node("fetch_data", fetch_database_info)
 workflow.add_node("generate_email", generate_email_draft)
 workflow.add_node("end_process", save_approved_email)
-workflow.add_edge("fetch_data", "generate_email")
-workflow.add_conditional_edges(
-    "generate_email",
-    route_human_choice,
+
+workflow.set_conditional_entry_point(
+    route_action,
     {
+        "fetch_data": "fetch_data",
         "generate_email": "generate_email",
         "end_process": "end_process",
     }
 )
-workflow.add_edge("end_process", END)
-workflow.set_entry_point("fetch_data")
 
-# By adding an interrupt, the graph will pause at the 'generate_email' node
-# AFTER it has executed, waiting for us to resume it.
-app_graph = workflow.compile(checkpointer=checkpointer, interrupt_after=["generate_email"])
+workflow.add_edge("fetch_data", "generate_email")
+workflow.add_edge("end_process", END)
+
+# After 'generate_email', the graph will pause (due to interrupt_after in main.py).
+# The next invocation will start over at the conditional entry point.
