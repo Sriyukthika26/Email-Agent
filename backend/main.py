@@ -1,33 +1,36 @@
-# /main.py
 import uuid
-from fastapi import FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request # Import Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import uvicorn
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END 
 
 # Import from our other modules
 from datamodels import GenerationRequest, UpdateRequest
-from graph import app_graph
+from graph import workflow
 from config import OPENAI_API_KEY
-
-# --- FastAPI Application ---
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Check for necessary configurations on startup."""
-    if not OPENAI_API_KEY or OPENAI_API_KEY == "YOUR_OPENAI_API_KEY":
-        print("WARNING: OPENAI_API_KEY is not set. The application will not work.")
+    """Manages application startup and shutdown."""
+    checkpointer = MemorySaver()
+    app.state.app_graph = workflow.compile(
+        checkpointer=checkpointer,
+        interrupt_after=["generate_email"],
+    )
+    print("--- Application startup complete. Graph compiled with MemorySaver. ---")
     yield
+    print("--- Application shutdown complete. ---")
 
 app = FastAPI(
     title="AI Email Agent Backend",
-    description="API for orchestrating email generation with a full human-in-the-loop workflow.",
+    description="API for orchestrating email generation with a human-in-the-loop workflow.",
     lifespan=lifespan,
 )
 origins = [
     "https://visionary-empanada-0ba1aa.netlify.app"
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -37,22 +40,22 @@ app.add_middleware(
 )
 
 @app.post("/generate")
-async def start_generation(request: GenerationRequest):
+async def start_generation(payload: GenerationRequest, request: Request):
     """Starts a new email generation flow and returns the first draft."""
+    app_graph = request.app.state.app_graph
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
     
     inputs = {
-        "lead_id": request.leadId,
-        "user_id": request.userId,
-        "user_instructions": request.user_instructions,
-        "email_history": [],
+        "lead_id": payload.leadId,
+        "user_id": payload.userId,
+        "user_instructions": payload.user_instructions,
     }
     
     final_state = await app_graph.ainvoke(inputs, config=config)
 
-    if final_state.get("error_message"):
-        raise HTTPException(status_code=500, detail=final_state["error_message"])
+    if error_message := final_state.get("error_message"):
+        raise HTTPException(status_code=500, detail=error_message)
         
     if not final_state or not final_state.get("email_history"):
         raise HTTPException(status_code=500, detail="Failed to generate email.")
@@ -64,25 +67,28 @@ async def start_generation(request: GenerationRequest):
     }
 
 @app.post("/update")
-async def update_generation(request: UpdateRequest):
+async def update_generation(payload: UpdateRequest, request: Request):
     """Resumes a paused graph with human feedback or approval."""
-    config = {"configurable": {"thread_id": request.thread_id}}
+    app_graph = request.app.state.app_graph
+    config = {"configurable": {"thread_id": payload.thread_id}}
     
     state_update = {
-        "human_decision": request.decision,
-        "feedback": request.feedback
+        "human_decision": payload.decision,
+        "feedback": payload.feedback
     }
     
     final_state = await app_graph.ainvoke(state_update, config=config)
     
-    if final_state.get("error_message"):
-        raise HTTPException(status_code=500, detail=final_state["error_message"])
+    if error_message := final_state.get("error_message"):
+        raise HTTPException(status_code=500, detail=error_message)
 
-    is_done = not app_graph.get_state(config).next
+    # The 'approve' decision persists in the state for the "approve" flow,
+    # but is cleared by the 'generate_email' node in the "regenerate" flow.
+    is_done = final_state.get("human_decision") == "approve"
     
     return {
-        "thread_id": request.thread_id,
-        "email": final_state["email_history"][-1].dict() if not is_done else None,
+        "thread_id": payload.thread_id,
+        "email": final_state.get("email_history", [])[-1].dict() if not is_done and final_state.get("email_history") else None,
         "is_done": is_done,
         "message": "Email approved and process finished." if is_done else "Email regenerated."
     }
@@ -91,8 +97,10 @@ async def update_generation(request: UpdateRequest):
 def read_root():
     return {"message": "AI Email Agent Backend is running."}
 
-
 if __name__ == "__main__":
     
     uvicorn.run(app, host="0.0.0.0", port=10000)
+
+
+
 
