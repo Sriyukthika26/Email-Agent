@@ -10,7 +10,7 @@ You are a world-class sales strategist and copywriter. Your task is to draft a s
 {user_instructions}
 
 
-**Chain of Thought - Follow these steps before writing:**
+**Follow these steps before writing:**
 
 1.  **Identify Sender & Recipient:** Determine who is sending and receiving the email from the CRM data objects. The primary recipient is `applicant_name` in the `crm_lead` object.
 2.  **Analyze Current Position:** The lead's current stage is **"{stage_name}"**.
