@@ -6,8 +6,8 @@ import EmailDisplay from './emaildisplay';
 
 export default function App() {
     // --- State Management ---
-    const [leadId, setLeadId] = useState('2094');
-    const [userId, setUserId] = useState('53');
+    const [leadId, setLeadId] = useState('25649');
+    const [userId, setUserId] = useState('294');
     const [userInstructions, setUserInstructions] = useState('');
     const [retrievedData, setRetrievedData] = useState(null);
     const [emailHistory, setEmailHistory] = useState([]);
@@ -19,6 +19,8 @@ export default function App() {
     const [editedEmail, setEditedEmail] = useState({ subject: '', body: '' });
     const [feedback, setFeedback] = useState('');
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const [satisfactionChoice, setSatisfactionChoice] = useState(null);
+
 
     // --- Notification Logic ---
     useEffect(() => {
@@ -39,6 +41,7 @@ export default function App() {
         setHistoryIndex(-1);
         setRetrievedData(null);
         setCurrentThreadId(null);
+        setSatisfactionChoice(null);
 
         try {
             const result = await api.generateEmail(leadId, userId, userInstructions);
@@ -56,12 +59,14 @@ export default function App() {
     const handleRegenerateWithFeedback = async () => {
         if (!currentThreadId || !feedback) return;
         setIsRegenerating(true);
+        setSatisfactionChoice(null);
+
         try {
-            const result = await api.updateEmail(currentThreadId, 'regenerate', feedback);
+            const result = await api.updateEmail(currentThreadId, 'regenerate', feedback, emailHistory);
             if (result.email) {
-                const newHistory = [...emailHistory, result.email];
-                setEmailHistory(newHistory);
-                setHistoryIndex(newHistory.length - 1);
+                const newHistoryFromServer = [...emailHistory, result.email];
+                setEmailHistory(newHistoryFromServer);
+                setHistoryIndex(newHistoryFromServer.length - 1);
                 setFeedback('');
                 showNotification(result.message, 'info');
             }
@@ -75,14 +80,18 @@ export default function App() {
     const handleApprove = async () => {
         if (!currentThreadId) return;
         setIsLoading(true);
+
         try {
+            // The latest history (including edits) is already on the backend,
+            // so we don't need to send it again.
             const result = await api.updateEmail(currentThreadId, 'approve');
             showNotification(result.message, 'success');
-            // Reset state after approval
+            
             setEmailHistory([]);
             setHistoryIndex(-1);
             setRetrievedData(null);
             setCurrentThreadId(null);
+            setSatisfactionChoice(null);
         } catch (error) {
             showNotification(error.message);
         } finally {
@@ -91,21 +100,34 @@ export default function App() {
     };
 
     // --- UI Handlers ---
-    const handleEditToggle = () => {
+    const handleEditToggle = async () => { // Make the function async
         const currentEmail = emailHistory[historyIndex];
         if (!currentEmail) return;
+
         if (isEditing) {
+            // When saving an edit
             const newHistory = [...emailHistory.slice(0, historyIndex + 1), editedEmail];
             setEmailHistory(newHistory);
             setHistoryIndex(newHistory.length - 1);
+            setIsEditing(false);
+
+            // *** NEW: Immediately send the updated history to the backend ***
+            try {
+                await api.updateHistory(currentThreadId, newHistory);
+                showNotification("Edit saved to backend.", "info");
+            } catch (error) {
+                showNotification(`Failed to save edit: ${error.message}`, "error");
+            }
         } else {
+            // When entering editing mode
             setEditedEmail(currentEmail);
+            setIsEditing(true);
         }
-        setIsEditing(!isEditing);
     };
 
     const navigateHistory = (direction) => {
         setIsEditing(false);
+        setSatisfactionChoice(null);
         setHistoryIndex(prev => Math.max(0, Math.min(emailHistory.length - 1, prev + direction)));
     };
 
@@ -145,6 +167,8 @@ export default function App() {
                         handleEditToggle={handleEditToggle}
                         handleRegenerateWithFeedback={handleRegenerateWithFeedback}
                         handleApprove={handleApprove}
+                        satisfactionChoice={satisfactionChoice}
+                        setSatisfactionChoice={setSatisfactionChoice}
                     />
                 </main>
 

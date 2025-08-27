@@ -36,9 +36,10 @@ const ControlPanel = ({
                     <h3 className="font-semibold text-lg">Retrieved Data</h3>
                     <DataCard title="Lead Info (crm_lead)" data={retrievedData.crm_lead} />
                     <DataCard title="Stage Info (crm_stage)" data={retrievedData.crm_stage} />
-                    <DataCard title="User Info (res_users)" data={retrievedData.res_users} />
                     <DataCard title="User Contact (res_partner)" data={retrievedData.res_partner} />
                     <DataCard title="Company Info (organization)" data={retrievedData.organization} />
+                    <DataCard title="Company's Past Projects" data={retrievedData.past_projects} />
+                    <DataCard title="Conversation History" data={retrievedData.conversation_history} />
                 </div>
             )}
         </div>
