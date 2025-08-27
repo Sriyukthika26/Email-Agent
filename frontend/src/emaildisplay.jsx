@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Edit, Check, Send, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit, Check, Send, RefreshCw, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { IconButton, PrimaryButton } from './components';
 
 const EmailDisplay = ({
@@ -15,9 +15,19 @@ const EmailDisplay = ({
     navigateHistory,
     handleEditToggle,
     handleRegenerateWithFeedback,
-    handleApprove
+    handleApprove,
+    satisfactionChoice,
+    setSatisfactionChoice
 }) => {
     const currentEmail = historyIndex >= 0 ? emailHistory[historyIndex] : null;
+    const [showRegenerateInput, setShowRegenerateInput] = React.useState(false);
+
+    // Reset local state when navigating history
+    React.useEffect(() => {
+        setSatisfactionChoice(null);
+        setShowRegenerateInput(false);
+    }, [historyIndex, setSatisfactionChoice]);
+
 
     return (
         <div className="lg:col-span-3 bg-white p-6 shadow-lg rounded-xl border border-gray-200">
@@ -68,32 +78,75 @@ const EmailDisplay = ({
 
             {/* --- Action Buttons Area --- */}
             {currentEmail && (
-                <div className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                        <h3 className="font-semibold">Provide Feedback to Regenerate</h3>
-                        <div className="flex space-x-2">
-                            <input type="text" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="e.g., 'Make it more formal'" className="flex-grow px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                            <PrimaryButton
-                                onClick={handleRegenerateWithFeedback}
-                                disabled={!feedback || isRegenerating || isLoading}
-                                isLoading={isRegenerating}
-                                className="w-auto px-4"
-                            >
-                                <RefreshCw size={16} />
+                <div className="mt-4 space-y-4 pt-4 border-t">
+                    {/* Step 1: Initial Satisfaction Check (Show if not editing and no choice made) */}
+                    {!isEditing && satisfactionChoice === null && (
+                        <div className="p-4 text-center bg-gray-50 rounded-lg">
+                            <h3 className="font-semibold mb-3 text-gray-800">Are you satisfied with this draft?</h3>
+                            <div className="flex justify-center items-center space-x-4">
+                                <IconButton onClick={() => setSatisfactionChoice('unsatisfied')} className="text-red-500 hover:bg-red-100" title="Unsatisfied">
+                                    <ThumbsDown size={24} />
+                                </IconButton>
+                                <IconButton onClick={() => setSatisfactionChoice('satisfied')} className="text-green-500 hover:bg-green-100" title="Satisfied">
+                                    <ThumbsUp size={24} />
+                                </IconButton>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 2 (Thumbs Down): Show correction options */}
+                    {!isEditing && satisfactionChoice === 'unsatisfied' && (
+                        <div className="p-4 text-center bg-gray-50 rounded-lg space-y-4">
+                             <h3 className="font-semibold text-gray-800">What needs to be changed?</h3>
+                             <div className="flex justify-center items-center space-x-3">
+                                <button onClick={() => { setSatisfactionChoice(null); setShowRegenerateInput(false); }} className="font-semibold text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    Back
+                                </button>
+                                <button onClick={() => setShowRegenerateInput(true)} className="font-semibold text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                    Regenerate (for major changes)
+                                </button>
+                                <button onClick={handleEditToggle} className="flex items-center gap-2 font-semibold text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors">
+                                    <Edit size={18} />
+                                    Edit Manually (for minor fixes)
+                                </button>
+                             </div>
+                             {showRegenerateInput && (
+                                <div className="flex space-x-2 pt-3">
+                                    <input type="text" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="e.g., 'Make it more formal'" className="flex-grow px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                    <PrimaryButton onClick={handleRegenerateWithFeedback} disabled={!feedback || isRegenerating || isLoading} isLoading={isRegenerating} className="w-auto px-4">
+                                        <RefreshCw size={16} />
+                                    </PrimaryButton>
+                                </div>
+                             )}
+                        </div>
+                    )}
+
+                    {/* Step 2 (Thumbs Up): Show finalization options */}
+                    {!isEditing && satisfactionChoice === 'satisfied' && (
+                        <div className="flex items-center justify-end space-x-3">
+                             <button onClick={() => setSatisfactionChoice(null)} className="font-semibold text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                Back
+                            </button>
+                            <button onClick={handleEditToggle} className="flex items-center gap-2 font-semibold text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                                <Edit size={18} />
+                                Edit
+                            </button>
+                            <PrimaryButton onClick={handleApprove} disabled={isLoading} isLoading={isLoading && !!currentEmail} className="bg-green-600 hover:bg-green-700 focus:ring-green-500">
+                                <Send size={16} className="mr-2" />
+                                Approve & Send
                             </PrimaryButton>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="flex items-center justify-end space-x-3 pt-4 border-t">
-                        <button onClick={handleEditToggle} className="flex items-center gap-2 font-semibold text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-                            {isEditing ? <Check size={18} /> : <Edit size={18} />}
-                            {isEditing ? 'Save Edit' : 'Edit Manually'}
-                        </button>
-                        <PrimaryButton onClick={handleApprove} disabled={isLoading} isLoading={isLoading && !!currentEmail} className="bg-green-600 hover:bg-green-700 focus:ring-green-500">
-                            <Send size={16} className="mr-2" />
-                            Approve & Send
-                        </PrimaryButton>
-                    </div>
+                    {/* Actions shown ONLY when editing */}
+                    {isEditing && (
+                        <div className="flex items-center justify-end">
+                             <button onClick={handleEditToggle} className="flex items-center gap-2 font-semibold text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors">
+                                <Check size={18} />
+                                Save & Continue
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
