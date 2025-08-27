@@ -10,7 +10,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CRM_API_KEY = os.getenv("CRM_API_KEY")
 
 # Set the CRM API endpoint
-CRM_API_URL = "https://crm.buildmapper.ai/api/v1/execute_query"
+CRM_API_URL = "https://staging.crm.buildmapper.ai/api/v1/execute_query"
 
 # Set the OpenAI model to be used
 LLM_MODEL = "gpt-4o"
