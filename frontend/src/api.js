@@ -49,3 +49,17 @@ export const updateEmail = async (thread_id, decision, feedback = null) => {
     }
     return response.json();
 };
+
+export const updateHistory = async (thread_id, email_history) => {
+    const response = await fetch(`${API_BASE_URL}/state`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_id, email_history })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save edit to backend');
+    }
+    return response.json();
+};
