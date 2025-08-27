@@ -1,13 +1,11 @@
 import uuid
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request # Import Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import END 
-
-# Import from our other modules
-from datamodels import GenerationRequest, UpdateRequest
+from langgraph.graph import END
+from datamodels import GenerationRequest, UpdateRequest, StateUpdateRequest
 from graph import workflow
 from config import OPENAI_API_KEY
 
@@ -41,7 +39,7 @@ app.add_middleware(
 
 @app.post("/generate")
 async def start_generation(payload: GenerationRequest, request: Request):
-    """Starts a new email generation flow and returns the first draft."""
+    """Starts a new email generation flow."""
     app_graph = request.app.state.app_graph
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
@@ -68,30 +66,45 @@ async def start_generation(payload: GenerationRequest, request: Request):
 
 @app.post("/update")
 async def update_generation(payload: UpdateRequest, request: Request):
-    """Resumes a paused graph with human feedback or approval."""
+    """Resumes a paused graph with feedback or approval."""
     app_graph = request.app.state.app_graph
     config = {"configurable": {"thread_id": payload.thread_id}}
     
-    state_update = {
+    updates = {
         "human_decision": payload.decision,
-        "feedback": payload.feedback
+        "feedback": payload.feedback,
     }
+
+    await app_graph.ainvoke(updates, config=config)
     
-    final_state = await app_graph.ainvoke(state_update, config=config)
+    final_state_values = await app_graph.aget_state(config)
     
-    if error_message := final_state.get("error_message"):
+    if error_message := final_state_values.values.get("error_message"):
         raise HTTPException(status_code=500, detail=error_message)
 
-    # The 'approve' decision persists in the state for the "approve" flow,
-    # but is cleared by the 'generate_email' node in the "regenerate" flow.
-    is_done = final_state.get("human_decision") == "approve"
+    is_done = final_state_values.values.get("human_decision") == "approve"
     
     return {
         "thread_id": payload.thread_id,
-        "email": final_state.get("email_history", [])[-1].dict() if not is_done and final_state.get("email_history") else None,
+        "email": final_state_values.values.get("email_history", [])[-1].dict() if not is_done and final_state_values.values.get("email_history") else None,
         "is_done": is_done,
         "message": "Email approved and process finished." if is_done else "Email regenerated."
     }
+
+
+@app.post("/state")
+async def update_state(payload: StateUpdateRequest, request: Request):
+    """Explicitly updates the state for a given thread without running the graph."""
+    app_graph = request.app.state.app_graph
+    config = {"configurable": {"thread_id": payload.thread_id}}
+    
+    try:
+        await app_graph.aupdate_state(config, {"email_history": payload.email_history})
+        print(f"--- State updated for thread {payload.thread_id}. Last subject: {payload.email_history[-1].subject} ---")
+        return {"status": "ok", "message": "State updated successfully."}
+    except Exception as e:
+        print(f"Error updating state: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update state: {e}")
 
 @app.get("/")
 def read_root():
