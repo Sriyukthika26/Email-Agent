@@ -55,17 +55,6 @@ export const PrimaryButton = ({ onClick, children, disabled = false, isLoading =
     </button>
 );
 
-// --- Data Display Component ---
-
-export const DataCard = ({ title, data }) => (
-    <details className="bg-[#f8fafc] p-3 rounded-lg border border-[#e5e7eb]">
-        <summary className="font-semibold text-[#111827] cursor-pointer">{title}</summary>
-        <div className="mt-2 text-xs text-[#6b7280]">
-            <pre className="bg-gray-100 p-2 rounded whitespace-pre-wrap break-all">{JSON.stringify(data, null, 2)}</pre>
-        </div>
-    </details>
-);
-
 // --- Notification Component ---
 
 export const Notification = ({ message, type, show }) => {

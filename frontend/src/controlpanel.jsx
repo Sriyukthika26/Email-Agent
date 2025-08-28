@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputField, TextareaField, PrimaryButton, DataCard } from './components';
+import { InputField, TextareaField, PrimaryButton } from './components';
 
 const ControlPanel = ({
     leadId,
@@ -12,7 +12,6 @@ const ControlPanel = ({
     handleGenerate,
     isLoading,
     currentEmail,
-    retrievedData
 }) => {
     return (
         <div className="lg:col-span-2 bg-white p-6 shadow-lg rounded-xl border border-gray-200 h-fit">
@@ -44,17 +43,6 @@ const ControlPanel = ({
                 </PrimaryButton>
             </div>
 
-            {retrievedData && (
-                <div className="mt-6 space-y-3">
-                    <h3 className="font-semibold text-lg">Retrieved Data</h3>
-                    <DataCard title="Lead Info (crm_lead)" data={retrievedData.crm_lead} />
-                    <DataCard title="Stage Info (crm_stage)" data={retrievedData.crm_stage} />
-                    <DataCard title="User Contact (res_partner)" data={retrievedData.res_partner} />
-                    <DataCard title="Company Info (organization)" data={retrievedData.organization} />
-                    <DataCard title="Company's Past Projects" data={retrievedData.past_projects} />
-                    <DataCard title="Conversation History" data={retrievedData.conversation_history} />
-                </div>
-            )}
         </div>
     );
 };
