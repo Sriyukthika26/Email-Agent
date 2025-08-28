@@ -21,6 +21,19 @@ export default function App() {
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [satisfactionChoice, setSatisfactionChoice] = useState(null);
 
+    // Read leadId and userId from URL on initial load
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const urlLeadId = queryParams.get('leadId');
+        const urlUserId = queryParams.get('userId');
+
+        if (urlLeadId) {
+            setLeadId(urlLeadId);
+        }
+        if (urlUserId) {
+            setUserId(urlUserId);
+        }
+    }, []); // The empty array ensures this runs only once on component mount
 
     // --- Notification Logic ---
     useEffect(() => {
@@ -111,7 +124,7 @@ export default function App() {
             setHistoryIndex(newHistory.length - 1);
             setIsEditing(false);
 
-            // *** NEW: Immediately send the updated history to the backend ***
+            // Immediately send the updated history to the backend
             try {
                 await api.updateHistory(currentThreadId, newHistory);
                 showNotification("Edit saved to backend.", "info");
@@ -132,6 +145,9 @@ export default function App() {
     };
 
     // --- Render ---
+    const queryParams = new URLSearchParams(window.location.search);
+    const idsAreFromUrl = !!(queryParams.get('leadId') || queryParams.get('userId'));
+
     return (
         <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
             <div className="container mx-auto p-4 md:p-8 max-w-6xl">
@@ -146,6 +162,7 @@ export default function App() {
                         setLeadId={setLeadId}
                         userId={userId}
                         setUserId={setUserId}
+                        idsAreFromUrl={idsAreFromUrl}
                         userInstructions={userInstructions}
                         setUserInstructions={setUserInstructions}
                         handleGenerate={handleGenerate}
