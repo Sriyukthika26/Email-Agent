@@ -149,7 +149,6 @@ export default function App() {
             <div className="container mx-auto p-4 md:p-8 max-w-6xl">
                 <header className="bg-white shadow-lg rounded-xl p-6 mb-8 border border-[#e5e7eb]">
                     <h1 className="text-3xl font-bold text-[#111827]">AI Email Agent</h1>
-                    <p className="text-[#6b7280] mt-1">React Frontend with Live Python Backend</p>
                 </header>
 
                 <main className="grid grid-cols-1 lg:grid-cols-5 gap-8">
