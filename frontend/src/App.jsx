@@ -113,18 +113,15 @@ export default function App() {
     };
 
     // --- UI Handlers ---
-    const handleEditToggle = async () => { // Make the function async
+    const handleEditToggle = async () => {
         const currentEmail = emailHistory[historyIndex];
         if (!currentEmail) return;
 
         if (isEditing) {
-            // When saving an edit
             const newHistory = [...emailHistory.slice(0, historyIndex + 1), editedEmail];
             setEmailHistory(newHistory);
             setHistoryIndex(newHistory.length - 1);
             setIsEditing(false);
-
-            // Immediately send the updated history to the backend
             try {
                 await api.updateHistory(currentThreadId, newHistory);
                 showNotification("Edit saved to backend.", "info");
@@ -132,7 +129,6 @@ export default function App() {
                 showNotification(`Failed to save edit: ${error.message}`, "error");
             }
         } else {
-            // When entering editing mode
             setEditedEmail(currentEmail);
             setIsEditing(true);
         }
@@ -149,11 +145,11 @@ export default function App() {
     const idsAreFromUrl = !!(queryParams.get('leadId') || queryParams.get('userId'));
 
     return (
-        <div className="bg-gray-100 min-h-screen font-sans text-gray-800">
+        <div className="bg-[#f8fafc] min-h-screen font-sans text-[#111827]">
             <div className="container mx-auto p-4 md:p-8 max-w-6xl">
-                <header className="bg-white shadow-lg rounded-xl p-6 mb-8 border border-gray-200">
-                    <h1 className="text-3xl font-bold text-gray-900">AI Email Agent</h1>
-                    <p className="text-gray-600 mt-1">React Frontend with Live Python Backend</p>
+                <header className="bg-white shadow-lg rounded-xl p-6 mb-8 border border-[#e5e7eb]">
+                    <h1 className="text-3xl font-bold text-[#111827]">AI Email Agent</h1>
+                    <p className="text-[#6b7280] mt-1">React Frontend with Live Python Backend</p>
                 </header>
 
                 <main className="grid grid-cols-1 lg:grid-cols-5 gap-8">
