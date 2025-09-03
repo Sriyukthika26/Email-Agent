@@ -122,6 +122,7 @@ export default function App() {
             setEmailHistory(newHistory);
             setHistoryIndex(newHistory.length - 1);
             setIsEditing(false);
+            // setSatisfactionChoice(null);
             try {
                 await api.updateHistory(currentThreadId, newHistory);
                 showNotification("Edit saved to backend.", "info");
@@ -132,6 +133,14 @@ export default function App() {
             setEditedEmail(currentEmail);
             setIsEditing(true);
         }
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false); // Exit editing mode
+        if (currentEmail) {
+            setEditedEmail(currentEmail); // Discard changes by resetting to the original
+        }
+        setSatisfactionChoice(null); // Return to the satisfaction check view
     };
 
     const navigateHistory = (direction) => {
@@ -181,6 +190,7 @@ export default function App() {
                         handleApprove={handleApprove}
                         satisfactionChoice={satisfactionChoice}
                         setSatisfactionChoice={setSatisfactionChoice}
+                        handleCancelEdit={handleCancelEdit}
                     />
                 </main>
 
