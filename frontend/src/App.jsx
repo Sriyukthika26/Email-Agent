@@ -6,8 +6,8 @@ import EmailDisplay from './emaildisplay';
 
 export default function App() {
     // --- State Management ---
-    const [leadId, setLeadId] = useState('25649');
-    const [userId, setUserId] = useState('294');
+    const [leadId, setLeadId] = useState('20410');
+    const [userId, setUserId] = useState('7');
     const [userInstructions, setUserInstructions] = useState('');
     const [retrievedData, setRetrievedData] = useState(null);
     const [emailHistory, setEmailHistory] = useState([]);
