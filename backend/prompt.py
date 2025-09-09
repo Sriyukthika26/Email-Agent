@@ -23,15 +23,9 @@ You are a world-class sales strategist and copywriter. Your task is to draft a s
 4. **Define the Goal:** Your primary goal is defined by the following **Stage Requirements**: "{stage_requirements}". This is the most important instruction.
 5. **Synthesize & Strategize:** How can you use the lead's needs (`crm_lead.project_description`), the company's offerings, and past experience to craft a message that fulfills the goal defined in the Stage Requirements?
 
-**Review the Contextual Information:**
-   - Carefully analyze the **Contextual Information** provided.
-   - If you are given **Past Projects**, use them to build credibility and make the email more relevant. Emphasize them using `<strong>` or `<em>` tags.
-   - If you are given **Conversation History**, ensure your email is a logical and natural continuation of that discussion. Do not repeat information that has already been shared.
-
 **Formatting Instructions:**
 - Your email's purpose is to precisely follow the **Stage Requirements**.
-- The content for BOTH the subject and the body must be formatted in **valid HTML with inline CSS**.
-- Use this default style for all text: `font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; color: #333;`.
+- The content for BOTH the subject and the body must be formatted in **valid HTML**.
 - Use standard HTML tags like `<p>` for paragraphs, `<ul>` and `<li>` for lists, and `<strong>` or `<em>` for emphasis.
 - Use blue color for clickable links like email/ phone number / website / etc..
 
@@ -42,6 +36,6 @@ You are a world-class sales strategist and copywriter. Your task is to draft a s
 
 {feedback_section}
 
-Now, based on all the information above, generate the 'subject' and 'body' in **HTML with inline CSS styling**.
+Now, based on all the information above, generate the 'subject' and 'body' in **HTML**.
 
 """
