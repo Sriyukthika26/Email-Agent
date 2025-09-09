@@ -30,6 +30,7 @@ def generate_email_draft(state: AgentState) -> AgentState:
 
     feedback_section = ""
     if feedback and email_history:
+        print("--- (RUNNING) FEEDBACK SECTION ---")
         previous_draft = email_history[-1]
         feedback_section = f"""
         **IMPORTANT HUMAN FEEDBACK ON THE PREVIOUS DRAFT:**
@@ -41,22 +42,27 @@ def generate_email_draft(state: AgentState) -> AgentState:
         ---
         REQUIRED CHANGES: "{feedback}"
         """
-        
+
     context_section = ""
     conversation_history = db_data.get("conversation_history", [])
     past_projects = db_data.get("past_projects", [])
 
     if conversation_history:
+        print("--- (RUNNING) CONVERSATION HISTORY SECTION ---")
         history_json = json.dumps(conversation_history, indent=2)
-        context_section = f"""**Instruction:** Review the following conversation history (in JSON format) to draft a logical next-step email. The `id` and `parent_id` fields show the reply chain. Avoid repetition.
+        context_section = f"""**Instruction:** Review the following conversation history (in JSON format) to draft a logical next-step email. The `id` and `parent_id` fields show the reply chain.
+        Do not repeat information that has already been shared.
         **Previous Conversation History:**
         ```json
             {history_json}
         ```"""
     elif past_projects:
+        print("--- (RUNNING) PAST PROJECTS SECTION ---")
         context_section = f"""**Instruction:** This is the first email to this lead. To build credibility, subtly reference 1-2 relevant project from the list below.For instance, if the lead's project is residential, mention a similar residential project the company has completed.
         **Company's Past Projects (for reference):**
-        {past_projects}"""
+        {past_projects}
+        Emphasize the mentioned projects using `<strong>` or `<em>` tags.
+        """
 
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0.5)
     structured_llm = llm.with_structured_output(EmailDraft)

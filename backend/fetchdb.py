@@ -1,8 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datamodels import AgentState
-from datafetch import datafetch
 from projectsfetch import fetch_projects
-from helper_functions import filter_id_fields
+from helper_functions import datafetch, filter_id_fields
 
 def fetch_with_concurrency(state: AgentState) -> AgentState:
     """
@@ -41,7 +40,7 @@ def fetch_with_concurrency(state: AgentState) -> AgentState:
 
             # 2. Partner
             partner_query = f"""
-                SELECT name, title, complete_name, ref, tz, vat, company_registry,
+                SELECT name, title, complete_name,
                        website, function, type, street, street2, zip, city, email,
                        phone, mobile, commercial_company_name, company_name, barcode,
                        comment, active, employee, contact_address_complete,
@@ -62,11 +61,9 @@ def fetch_with_concurrency(state: AgentState) -> AgentState:
                        builder_email, owner_company, owner_phone, owner_name, owner_email, applicant_name, applicant_company,
                        applicant_phone, applicant_email, contact_name, partner_name, email_from, email_domain_criterion,
                        email_cc, type, priority, phone, mobile, website, street, street2, zip, city, date_deadline,
-                       lead_properties, description, expected_revenue, prorated_revenue, recurring_revenue,
-                       recurring_revenue_monthly, recurring_revenue_monthly_prorated, recurring_revenue_prorated,
-                       day_open, day_close, probability, automated_probability, won_status, days_to_convert,
-                       days_exceeding_closing, month_started, permit_issue_date, cost_of_construction,
-                       additional_info, project_year, is_lead_lost, lost_feedback, stage_id
+                       lead_properties, description, expected_revenue, day_open, day_close, probability, automated_probability,
+                       won_status, days_to_convert, days_exceeding_closing, month_started, permit_issue_date,
+                       cost_of_construction, additional_info, project_year, is_lead_lost, lost_feedback, stage_id
                 FROM crm_lead WHERE id = {lead_id};
             """
             print(f"Fetching lead info for lead_id={lead_id}")
@@ -117,7 +114,7 @@ def fetch_with_concurrency(state: AgentState) -> AgentState:
 
         if not latest_message or not latest_message[0].get("parent_id"):
             print("No conversation found → fetching past projects")
-            past_projects_data = fetch_projects(company_id=company_id, limit=20)
+            past_projects_data = fetch_projects(company_id=company_id, limit=15)   #fetching past 15 projects
             raw_projects = past_projects_data.get("data", {}).get("projects", []) if past_projects_data else []
             db_data["past_projects"] = [
                 {
@@ -125,7 +122,6 @@ def fetch_with_concurrency(state: AgentState) -> AgentState:
                     "serviceType": p.get("serviceType"),
                     "projectType": p.get("projectType"),
                     "builderName": p.get("builderName"),
-                    "builderEmail": p.get("builderEmail"),
                     "projectAddress": p.get("projectAddress"),
                     "city": p.get("city"),
                     "country": p.get("country"),
@@ -136,15 +132,26 @@ def fetch_with_concurrency(state: AgentState) -> AgentState:
             db_data["conversation_history"] = []
             print(f"✔ Past projects fetched ({len(db_data['past_projects'])} projects)")
         else:
-            print("Conversation found → fetching full history")
+            print("Conversation found → fetching history")
             history_query = f"""
                 SELECT id, parent_id, email_from, subject, body, date
                 FROM mail_message
                 WHERE model = 'crm.lead' AND res_id = {lead_id}
-                ORDER BY date DESC;
+                AND subject IS NOT NULL AND body IS NOT NULL 
+                ORDER BY date DESC
+                LIMIT 10;
             """
             conversation_records = datafetch(history_query)
-            db_data["conversation_history"] = conversation_records if conversation_records else []
+            cleaned_history = []
+            if conversation_records:
+                for record in conversation_records:
+                    if record.get('body'):
+                        # Use regex to strip HTML tags and get plain text
+                        clean_body = re.sub('<[^<]+?>', '', record['body'])
+                        record['body'] = clean_body.strip()
+                    cleaned_history.append(record)
+
+            db_data["conversation_history"] = cleaned_history
             db_data["past_projects"] = []
             print(f"✔ Conversation history fetched ({len(db_data['conversation_history'])} messages)")
 
