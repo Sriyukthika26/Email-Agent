@@ -5,11 +5,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env
 load_dotenv()
 
-# Switch environment: "dev" or "staging"
-ENV = os.getenv("ENV", "staging")
-BASE_URL = f"https://{ENV}.api.buildmapper.ai"
-ENDPOINT = "/odoo/api/v1/companyProfile/projects/fetch/public/id"
-URL = BASE_URL + ENDPOINT
+URL = "https://dev.api.buildmapper.ai/odoo/api/v1/companyProfile/projects/fetch/public/id"
 
 # Headers 
 HEADERS = {
