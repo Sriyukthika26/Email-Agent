@@ -17,3 +17,10 @@
 /frontend/npm-debug.log*
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
+
+/ProdData/
+/StageData/
+/ProjectsData/
+
+/datafetch.py
+/stagingdatafetch.py
