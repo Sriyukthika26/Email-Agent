@@ -10,8 +10,14 @@ from langgraph.graph import StateGraph, END, START
 # Import from our other modules
 from datamodels import AgentState, EmailDraft
 from config import CRM_API_KEY, CRM_API_URL, LLM_MODEL
-from prompt import EMAIL_GENERATION_PROMPT
 from fetchdb import fetch_with_concurrency
+
+# Load prompt from text file
+def load_prompt():
+    with open('prompt.txt', 'r', encoding='utf-8') as f:
+        return f.read()
+
+EMAIL_GENERATION_PROMPT = load_prompt()
 
 # --- Graph Nodes (The "workers" of our agent) ---
 

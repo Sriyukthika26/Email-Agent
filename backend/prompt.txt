@@ -1,4 +1,3 @@
-EMAIL_GENERATION_PROMPT = """
 You are a world-class sales strategist and copywriter. Your task is to draft a strategic, personalized email based on the provided CRM data and user instructions.
 
 **CRM Data Objects:**
@@ -37,5 +36,3 @@ You are a world-class sales strategist and copywriter. Your task is to draft a s
 {feedback_section}
 
 Now, based on all the information above, generate the 'subject' and 'body' in **HTML**.
-
-"""
