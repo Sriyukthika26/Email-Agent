@@ -195,3 +195,4 @@ Backend dependencies are listed in `backend/requirements.txt` (FastAPI, LangChai
 ---
 
 
+<img width="1514" height="1063" alt="Screenshot 2025-09-09 114828" src="https://github.com/user-attachments/assets/9a3b625a-c0ea-4706-85fe-c88a1fefeff0" />
