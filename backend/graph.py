@@ -89,7 +89,7 @@ def save_approved_email(state: AgentState):
     print("--- (RUNNING) SAVING APPROVED EMAIL ---")
     approved_email = state.get("email_history", [])[-1]
     print(f"Final Approved Email Subject: {approved_email.subject}")
-    # In a real application, you would save this to a database.
+    # TODO: In a real application, save this to a database.
     return {}
 
 # --- Master Router ---
